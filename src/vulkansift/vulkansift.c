@@ -199,7 +199,8 @@ vksift_Result vksift_createInstance(vksift_Instance *instance_ptr, const vksift_
                                    .nb_general_queues = 1,
                                    .nb_async_compute_queues = 0,
                                    .nb_async_transfer_queues = 2,
-                                   .target_device_idx = config->gpu_device_index};
+                                   .target_device_idx = config->gpu_device_index,
+                                   .allow_cpu = config->allow_cpu};
 
   const char *device_extension_name = VK_KHR_SWAPCHAIN_EXTENSION_NAME;
   if (swapchain_extensions_supported)

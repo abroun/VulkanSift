@@ -144,6 +144,9 @@ extern "C"
     // Defines the scale-space image format precision (default: VKSIFT_PYRAMID_PRECISION_FLOAT32), images being the heaviest GPU resource
     // switching to a VKSIFT_PYRAMID_PRECISION_FLOAT16 reduces the GPU memory usage by a factor of two, with a small impact on the feature quality.
     vksift_PyramidPrecisionMode pyramid_precision_mode;
+    
+    // Allow use of CPU devices
+    bool allow_cpu;
 
     // Error function that can be called by all VulkanSift functions (except vksift_destroyX functions and functions returning a vksift_Result).
     // This function is called when errors (invalid input arguments, Vulkan function failures) are detected by the VulkanSift function.

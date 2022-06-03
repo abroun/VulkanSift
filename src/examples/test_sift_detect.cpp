@@ -1,6 +1,7 @@
 #include "test_utils.h"
 #include <vulkansift/vulkansift.h>
 
+#include <chrono>
 #include <iostream>
 #include <opencv2/opencv.hpp>
 #include <vector>
@@ -35,6 +36,7 @@ int main(int argc, char *argv[])
   vksift_Config config = vksift_getDefaultConfig();
   config.sift_buffer_count = 1; // only performing detection, a single GPU buffer is enough
   config.input_image_max_size = image.cols * image.rows;
+  config.allow_cpu = true;
 
   vksift_Instance vksift_instance = NULL;
   if (vksift_createInstance(&vksift_instance, &config) != VKSIFT_SUCCESS)
@@ -47,15 +49,26 @@ int main(int argc, char *argv[])
   std::vector<vksift_Feature> feat_vec;
   bool draw_oriented_keypoints = true;
 
+  std::chrono::steady_clock::duration avgDetectDuration;
+  int numDetections = 0;
+
   int user_key = 0;
   while (user_key != 'x')
   {
     // Run SIFT feature detection and copy the results to the CPU
+    auto detectStartTime = std::chrono::steady_clock::now();
+    std::cout << "Starting to detect features" << std::endl;
     vksift_detectFeatures(vksift_instance, image.data, image.cols, image.rows, 0u);
     feat_vec.resize(vksift_getFeaturesNumber(vksift_instance, 0u));
+    std::cout << "Starting to download features" << std::endl;
     vksift_downloadFeatures(vksift_instance, feat_vec.data(), 0u);
+    auto detectEndTime = std::chrono::steady_clock::now();
 
-    std::cout << "Feature found: " << feat_vec.size() << std::endl;
+    avgDetectDuration = (avgDetectDuration*numDetections + (detectEndTime - detectStartTime))/(numDetections + 1);
+    numDetections++;
+
+    std::cout << "Feature found: " << feat_vec.size() << " avg detect time = " 
+      << std::chrono::duration_cast<std::chrono::milliseconds>(avgDetectDuration).count() << " ms" << std::endl;
 
     cv::Mat draw_frame;
     image.convertTo(draw_frame, CV_8UC3);
